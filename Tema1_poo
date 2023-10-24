@@ -1,0 +1,273 @@
+#include <iostream>
+#include <vector>
+
+
+using namespace std;
+
+
+
+class bank_account
+{
+    std::string Iban;
+    float balance_e;
+    float balance_l;
+
+public:
+    friend ostream& operator<<(ostream & cout, const bank_account & obj);
+    bank_account() : Iban(""), balance_e(0), balance_l(0) {}
+    bank_account(std::string const & myiban ){
+        Iban = myiban;
+        balance_e=0;
+        balance_l=0;
+
+    }
+    
+    bank_account(const bank_account & obj)
+    {
+        Iban = obj.Iban;
+        balance_e = obj.balance_e;
+        balance_l = obj.balance_l;
+    }
+    
+    void deposit_e(float amount)
+    {
+        balance_e+=amount;
+        cout<<"Suma de " <<" lei "<<amount<<" a fost depozitata cu succes "<<endl;
+    }
+    void withdraw_e(float amount)
+    {
+        if(amount > balance_e)
+            cout<<"Nu puteti retrage suma dorita:fonduri insuficiente.Sold: "<<balance_l<<endl;
+        else
+            {
+            balance_e = balance_e - amount;
+            cout<<"S-a extras cu succes suma de " << amount << "euro "<<endl;
+            }
+    }
+    void deposit_l(float amount)
+    {
+        balance_l+=amount;
+        cout<<"Suma de " <<" lei "<<amount<<" a fost depozitata cu succes"<<endl;;
+    }
+    void withdraw_l(float amount)
+    {
+        if(amount > balance_l)
+            cout<<"Nu puteti retrage suma dorita:fonduri insuficiente.Sold: "<<balance_e << " Lei "<<endl;
+        else
+        {
+            balance_l = balance_l - amount;
+            cout<<"S-a extras cu succes suma de " << amount << "lei "<<endl;
+        }
+
+    }
+    void display_balance()
+    {
+        std::cout<<"Contul avand IBAN: "<< Iban << " are soldul " << balance_e << " Euro | " << balance_l << " Ron " <<endl;  
+    }
+    
+
+};
+
+ostream& operator<<(ostream & cout, const bank_account & obj)
+{
+    cout<<"IBAN: " << obj.Iban << endl;
+    cout<<"Sold euro: " << obj.balance_e<<endl;
+    cout<<"Sold euro: " << obj.balance_l<<endl;
+
+}
+
+
+class bank_loc{
+    std::string manager;
+    std::string location;
+public:
+    bank_loc(const std::string & Location, const std::string & Manager){
+        manager = Manager;
+        location = Location;
+    }
+    void change_manager(const std::string & new_manager)
+    {
+        manager = new_manager;
+    }
+    void display_details()
+    {
+        cout<<"Adresa: " << location <<endl;
+        cout<<"Manager: "<< manager <<endl; 
+    }
+};
+
+class client{
+
+    std::string first_name;
+    std::string last_name;
+    int client_id;
+    std::vector<float> history_e;
+    std::vector<float> history_l;
+    int tranzaction_nr_l;
+    int tranzaction_nr_e;
+    bank_account account;
+    bank_loc bank;
+    std::string username;
+    std::string password;
+public:
+    
+    client(const std::string & c_name, const std::string & c_prenume, int id, const bank_loc & c_bank, const bank_account & c_account)
+    : first_name(c_prenume), last_name(c_name), client_id(id), account(c_account), bank(c_bank)
+    {
+    tranzaction_nr_e = 0;
+    tranzaction_nr_l = 0;
+    }
+
+    void create_user()
+    {
+        cout<<"Creare utilizator "<<endl;
+        cout<<"Introduceti numele de utilizator dorit : ";
+        cin >> username;
+        cout<<"Introduceti parola dorita : ";
+        cin>>password;
+        
+    }
+    
+    bool login(std::string  introduced_username ,std::string  introduced_password)
+    {
+        return (introduced_username == username && introduced_password == password);
+    }
+    void permision_deposit_euro(const std::string & introduced_username, const std::string & introduced_password, float amount)
+    {
+        if(login(introduced_username, introduced_password))
+        {
+            account.deposit_e(amount);
+            history_e.push_back(amount);
+            tranzaction_nr_e++;
+        }
+        else
+        {
+            cout<< "Autentificare nereusita "<<endl;
+        }
+    }
+    void permision_deposit_ron(const std::string & introduced_username, const std::string & introduced_password, float amount)
+    {
+        if(login(introduced_username, introduced_password))
+        {
+            account.deposit_l(amount);
+            history_l.push_back(amount);
+            tranzaction_nr_l++;
+        }
+        else
+        {
+            cout<< "Autentificare nereusita "<<endl;
+        }
+    }
+    void permision_withdraw_ron(const std::string & introduced_username, const std::string & introduced_password, float amount)
+    {
+        if(login(introduced_username, introduced_password))
+        {
+            account.withdraw_l(amount);
+            history_l.push_back(amount*(-1));
+            tranzaction_nr_l++;
+        }
+        else
+        {
+            cout<< "Autentificare nereusita "<<endl;
+        }
+
+    }
+    void permision_withdraw_e(const std::string & introduced_username, const std::string & introduced_password, float amount)
+    {
+        if(login(introduced_username, introduced_password))
+        {
+            account.withdraw_e(amount);
+            history_e.push_back(amount*(-1));
+            tranzaction_nr_e++;
+        }
+        else
+        {
+            cout<< "Autentificare nereusita "<<endl;
+        }
+
+    }
+    
+    void display_details()
+    {
+        cout<<last_name<< " " <<first_name <<endl<<"Id: " <<client_id<<endl<<username<<" "<<password<<endl;
+        account.display_balance();
+        cout<<tranzaction_nr_e<< " "<< tranzaction_nr_l<<endl;
+        for(int i=0;i<tranzaction_nr_e;i++)
+            cout<<history_e[i]<<" "; 
+        cout<<endl;
+    }
+    friend  std::ostream& operator<<(std::ostream & cout, const client & c);
+    ~client(){};///nu manageriez resure manual in vreuna din aceste clase deci nu e nevoie neaparat de un costum constructor dar il pun asa totusi sa respecte cerinta
+    void operator=(const client & c)
+    {
+    first_name = c.first_name;
+    last_name = c.last_name;
+    client_id = c.client_id;
+    history_e = c.history_e;
+    history_l = c.history_l;
+    tranzaction_nr_l = c.tranzaction_nr_l;
+    tranzaction_nr_e = c.tranzaction_nr_e;
+    account = c.account;
+    bank = c.bank;
+    username = c.username;
+    password = c.password;
+    }
+};
+
+
+
+std::ostream& operator<<(std::ostream & cout, const client & c)
+{
+    cout << "Client: " << c.last_name << " " << c.first_name << endl;
+    cout << "ID: " << c.client_id << endl;
+    cout << "Username: " << c.username << endl;
+    cout << "Transactions in Euro: " << c.tranzaction_nr_e << endl;
+    cout << "Transactions in Ron: " << c.tranzaction_nr_l << endl;
+    return cout;
+}
+
+
+
+int main()
+{
+    bank_loc banca1("Calea Victoriei 25A", "Iulian Cristea");
+    bank_loc banca2("Iuliu Maniu 155", "Marian Draghici");
+    
+    bank_account acc1("RO34985345");
+    bank_account acc2("RO34563467");
+    bank_account acc3("RO13257452");
+    bank_account acc4("RO09234854");
+    bank_account acc5("RO00345203");
+
+    
+    client client1("Adrian", "Stan", 1, banca1, acc1);
+    client client2("Ada", "Cremeanu", 2, banca1, acc2);
+    client client3("Alexandru", "Popescu", 3, banca1, acc3);
+    client client4("Ana-Maria", "Tei", 4, banca2, acc4);
+    client client5("Mircea", "Lungu", 5, banca2, acc5);
+
+
+    client1.create_user();
+    std::string introduced_username;
+    std::string introduced_password;
+    cout<<"LOGIN : "<<endl;
+    cout<<"Username: ";
+    cin>>introduced_username;
+    cout<<"Password: ";
+    cin>>introduced_password;
+
+    client1.permision_deposit_euro(introduced_username, introduced_password, 1000);
+    client1.permision_deposit_ron(introduced_username, introduced_password,  1000);
+    client1.permision_withdraw_ron(introduced_username, introduced_password,  200); 
+
+    client1.display_details();
+    
+
+    cout << "Client 1 details:" << endl << client1 << endl;
+    cout << "Client 2 details:" << endl << client2 << endl;
+    cout << "Client 3 details:" << endl << client3 << endl;
+    cout << "Client 4 details:" << endl << client4 << endl;
+    cout << "Client 5 details:" << endl << client5 << endl;
+    
+    return 0;
+}
