@@ -85,6 +85,7 @@ public:
         manager = Manager;
         location = Location;
     }
+    bank_loc():manager(), location(){}
     void change_manager(const std::string & new_manager)
     {
         manager = new_manager;
@@ -110,7 +111,7 @@ class client{
     std::string username;
     std::string password;
 public:
-    
+    client(): first_name(),last_name(),client_id(),account(),bank(){}
     client(const std::string & c_name, const std::string & c_prenume, int id, const bank_loc & c_bank, const bank_account & c_account)
     : first_name(c_prenume), last_name(c_name), client_id(id), account(c_account), bank(c_bank)
     {
@@ -245,6 +246,7 @@ int main()
     client client3("Alexandru", "Popescu", 3, banca1, acc3);
     client client4("Ana-Maria", "Tei", 4, banca2, acc4);
     client client5("Mircea", "Lungu", 5, banca2, acc5);
+    client client6;
 
 
     client1.create_user();
@@ -268,6 +270,6 @@ int main()
     cout << "Client 3 details:" << endl << client3 << endl;
     cout << "Client 4 details:" << endl << client4 << endl;
     cout << "Client 5 details:" << endl << client5 << endl;
-    
+    cout << "Client 6 details:" << endl << client6 << endl;
     return 0;
 }
